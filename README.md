@@ -1,4 +1,4 @@
-**MLOps Linear Regression Pipeline**
+<img width="861" height="175" alt="image" src="https://github.com/user-attachments/assets/c075b26d-6950-41bf-8840-3bf057c5ddc7" />**MLOps Linear Regression Pipeline**
 A complete MLOps pipeline for Linear Regression using California Housing dataset with training, testing, quantization, Dockerization, and CI/CD automation.
 
 **Table of Contents**
@@ -14,7 +14,9 @@ A complete MLOps pipeline for Linear Regression using California Housing dataset
 10. Quantization Details
 
 **Overview**
-This project implements a complete MLOps pipeline for Linear Regression using the California Housing dataset. The pipeline includes:
+This project implements a complete MLOps pipeline for Linear Regression using the California Housing dataset. 
+
+The pipeline includes:
 
 **Model Training: Linear Regression using scikit-learn**
 1.Testing: Comprehensive unit tests with pytest
@@ -145,46 +147,14 @@ MSE (quant): 0.5912
 [QZ] Quantization quality: ok (max diff: 0.225426)
 
 **Model Performance**
-Performance Comparison Table
-Metric
+Metric	Original Model (Floating-Point)	Quantized Model (8-bit)
+		
+R^2 Score on Test Set	0.5758	0.5489
+MSE	N/A	0.225426
+Mean Prediction Difference	N/A	0.193829
+Model Size	1˜.5 KB (approx.)	0˜.1 KB (approx.)
+<img width="861" height="175" alt="image" src="https://github.com/user-attachments/assets/34b5a0ea-0f73-4af7-b0b2-9be8503fdfce" />
 
-Original Model (Floating-Point)
-
-Quantized Model (8-bit)
-
-R² Score on Test Set
-
-0.5758
-
-0.5489
-
-MSE
-
-0.5559
-
-0.5912
-
-Max Prediction Difference
-
-N/A
-
-0.225426
-
-Mean Prediction Difference
-
-N/A
-
-0.193829
-
-Model Size
-
-1
-˜
- .5 KB (approx.)
-
-0
-˜
- .1 KB (approx.)
 
 The results demonstrate a minor drop in the R 
 2
