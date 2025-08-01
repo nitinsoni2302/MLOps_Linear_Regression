@@ -10,9 +10,9 @@ on:
 
 # Define the jobs for the pipeline
 jobs:
-  # Job 1: Run pytest to ensure all tests pass
-  test_suite:
-    name: Run Test Suite
+  # Job 1: Train the model and run the test suite
+  train_and_test:
+    name: Train Model and Run Tests
     runs-on: ubuntu-latest
     steps:
       # Step to check out the repository code
@@ -25,48 +25,18 @@ jobs:
         with:
           python-version: '3.x'
           
-      # Add this new step to install system dependencies for scipy and numpy
+      # Install system dependencies for scipy and numpy
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libopenblas-dev gfortran
 
-      # Step to install project dependencies from requirements.txt
+      # Install project dependencies from requirements.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest # pytest is not in requirements.txt
-
-      # Step to run the unit tests with pytest
-      - name: Run pytest
-        run: |
-          pytest
-
-  # Job 2: Train the model, run quantization, and save artifacts
-  train_and_quantize:
-    name: Train and Quantize Model
-    runs-on: ubuntu-latest
-    needs: test_suite # This job depends on the test_suite job passing
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-          
-      # Install system dependencies for scipy and numpy again
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libopenblas-dev gfortran
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
 
       # Run the training script to generate the model artifact
       - name: Run training script
@@ -78,6 +48,11 @@ jobs:
         run: |
           python src/quantize.py
           
+      # Run the unit tests with pytest after the model has been created
+      - name: Run pytest
+        run: |
+          pytest
+      
       # Upload the model and quantization artifacts for the next job
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -85,11 +60,11 @@ jobs:
           name: model-artifacts
           path: models/
 
-  # Job 3: Build the Docker image and verify it works
+  # Job 2: Build the Docker image and verify it works
   build_and_test_container:
     name: Build and Test Docker Container
     runs-on: ubuntu-latest
-    needs: train_and_quantize # This job depends on the training/quantization job passing
+    needs: train_and_test # This job depends on the training/testing job passing
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
