@@ -24,6 +24,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+          
+      # Add this new step to install system dependencies for scipy and numpy
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenblas-dev gfortran
 
       # Step to install project dependencies from requirements.txt
       - name: Install dependencies
@@ -50,6 +56,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+          
+      # Install system dependencies for scipy and numpy again
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenblas-dev gfortran
 
       - name: Install dependencies
         run: |
@@ -90,12 +102,11 @@ jobs:
           path: models/
 
       # Log in to Docker Hub using GitHub Secrets for security
-      # NOTE: Using a hardcoded username here, but using a secret is recommended for security.
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: nitinsoni2302
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD}}
 
       # Build the Docker image
       - name: Build Docker image
@@ -103,7 +114,6 @@ jobs:
           docker build -t nitinsoni2302/mlops-linear-regression .
 
       # Run the container and execute predict.py for verification
-      # The '--rm' flag automatically removes the container after it exits
       - name: Run and test container
         run: |
           docker run --rm nitinsoni2302/mlops-linear-regression python src/predict.py
@@ -112,4 +122,3 @@ jobs:
       - name: Push Docker image
         run: |
           docker push nitinsoni2302/mlops-linear-regression
-
