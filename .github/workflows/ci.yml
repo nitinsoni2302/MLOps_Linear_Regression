@@ -1,0 +1,115 @@
+# .github/workflows/ci.yml
+
+name: MLOps CI/CD Pipeline
+
+# Trigger the workflow on every push to the main branch
+on:
+  push:
+    branches:
+      - main
+
+# Define the jobs for the pipeline
+jobs:
+  # Job 1: Run pytest to ensure all tests pass
+  test_suite:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      # Step to check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step to set up Python 3.x
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # Step to install project dependencies from requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest # pytest is not in requirements.txt
+
+      # Step to run the unit tests with pytest
+      - name: Run pytest
+        run: |
+          pytest
+
+  # Job 2: Train the model, run quantization, and save artifacts
+  train_and_quantize:
+    name: Train and Quantize Model
+    runs-on: ubuntu-latest
+    needs: test_suite # This job depends on the test_suite job passing
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Run the training script to generate the model artifact
+      - name: Run training script
+        run: |
+          python src/train.py
+
+      # Run the quantization script to generate the quantized parameters
+      - name: Run quantization script
+        run: |
+          python src/quantize.py
+          
+      # Upload the model and quantization artifacts for the next job
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: models/
+
+  # Job 3: Build the Docker image and verify it works
+  build_and_test_container:
+    name: Build and Test Docker Container
+    runs-on: ubuntu-latest
+    needs: train_and_quantize # This job depends on the training/quantization job passing
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Download the artifacts generated in the previous job
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: model-artifacts
+          path: models/
+
+      # Log in to Docker Hub using GitHub Secrets for security
+      # NOTE: Using a hardcoded username here, but using a secret is recommended for security.
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: nitinsoni2302
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # Build the Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t nitinsoni2302/mlops-linear-regression .
+
+      # Run the container and execute predict.py for verification
+      # The '--rm' flag automatically removes the container after it exits
+      - name: Run and test container
+        run: |
+          docker run --rm nitinsoni2302/mlops-linear-regression python src/predict.py
+
+      # Push the final Docker image to Docker Hub
+      - name: Push Docker image
+        run: |
+          docker push nitinsoni2302/mlops-linear-regression
+
