@@ -1,4 +1,4 @@
-<img width="861" height="175" alt="image" src="https://github.com/user-attachments/assets/c075b26d-6950-41bf-8840-3bf057c5ddc7" />**MLOps Linear Regression Pipeline**
+**MLOps Linear Regression Pipeline**
 A complete MLOps pipeline for Linear Regression using California Housing dataset with training, testing, quantization, Dockerization, and CI/CD automation.
 
 **Table of Contents**
